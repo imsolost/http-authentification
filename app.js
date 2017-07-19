@@ -19,30 +19,52 @@ app.use( session({
 }) )
 
 app.get('/', (req, res) => {
-  res.render('./home')
+  if (req.session.userid) {
+    queries.findById(req.session.userid)
+      .then( data => {
+        res.render('./profile.ejs', { greeting: `Welcome back ${data.email}`} )
+      })
+  } else {
+    res.render( './home.ejs')
+  }
 })
 
 app.get('/user/:id', (req, res) => {
-  // const user = req.params
-  res.render('./profile')
+  res.render('./profile.ejs')
 })
 
 app.get('/signup', (req, res) => {
-  res.render('./signup')
+  res.render('./signup.ejs')
 })
 
 app.get('/login', (req, res) => {
-  res.render('./login')
+  res.render('./login.ejs')
+})
+
+app.get('/logout', (req, res) => {
+  req.session.destroy()
+  res.redirect('/')
+})
+
+app.post('/login', (req, res) => {
+  const user = req.body
+  queries.find( user.email )
+    .then( data => {
+      if ( data.password === user.password ) {
+        req.session.userid = data.id
+      }
+    })
+    .then( () => res.redirect('/') )
 })
 
 app.post('/signup', (req, res) => {
   const user = req.body
   if (user.password === user.confirm) {
     queries.create( user.email, user.password )
-      .then( (data) => {
+      .then( data => {
         req.session.userid = data.id
       })
-      .then( () => res.redirect(`/user/${req.session.userid}`) )
+      .then( () => res.redirect('/') )
       .catch( err => { throw err } )
   }
 })

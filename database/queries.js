@@ -3,7 +3,9 @@ const connectionString = `pg://${process.env.USER}@localhost:5432/usersdb`
 const db = pgp( connectionString )
 
 exports.queries = {
-  find: (id) => db.one('SELECT * from userstable WHERE id = $1', [id]),
+  find: (email) => db.one('SELECT * FROM userstable WHERE email = $1', [email]),
 
-  create: (name, password) => db.one('INSERT INTO userstable (name, password) VALUES ($1, $2) RETURNING (id)', [name, password])
+  findById: (id) => db.one('SELECT * FROM userstable WHERE id = $1', [id]),
+
+  create: (email, password) => db.one('INSERT INTO userstable (email, password) VALUES ($1, $2) RETURNING (id)', [email, password])
 }
